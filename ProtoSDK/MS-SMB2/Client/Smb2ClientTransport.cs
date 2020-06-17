@@ -58,6 +58,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb2
 
         // Flag of packet header.
         private Packet_Header_Flags_Values headerFlags = Packet_Header_Flags_Values.NONE;
+
         #endregion
 
         #region Constructor
@@ -581,7 +582,13 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb2
             bool useServerToken)
         {
             serverPrincipleName = server;
-            this.client.ConnectOverTCP(Dns.GetHostAddresses(server).First());
+            IPAddress address;
+            if (!IPAddress.TryParse(server, out address))
+            {
+                IPHostEntry hostEntry = Dns.GetHostEntry(server);
+                address = hostEntry.AddressList[0];
+            }
+            this.client.ConnectOverTCP(address);
             InternalConnectShare(domain, userName, password, IPC_CONNECT_STRING, timeout, securityPackage, useServerToken);
         }
 

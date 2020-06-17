@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.AccessControl;
@@ -377,6 +378,45 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb
             this.capability.TransportType = TransportType.NetBIOS;
         }
 
+        private static bool ValidateIpVersion(IPAddress address, IpVersion ipVersion)
+        {
+            return ipVersion == IpVersion.Any ||
+                ipVersion == IpVersion.Ipv4 && address.AddressFamily == AddressFamily.InterNetwork ||
+                ipVersion == IpVersion.Ipv6 && address.AddressFamily == AddressFamily.InterNetworkV6;
+        }
+
+        private static IPAddress GetRemoteAddress(string serverName, IpVersion ipVersion)
+        {
+            IPAddress optAddress;
+
+            if (IPAddress.TryParse(serverName, out optAddress))
+            {
+                if (!ValidateIpVersion(optAddress, ipVersion))
+                {
+                    throw new InvalidOperationException("Invalid IP version");
+                }
+
+                return optAddress;
+            }
+            else
+            {
+                IPHostEntry ipHostEntry = Dns.GetHostEntry(serverName);
+
+                if (ipHostEntry == null)
+                {
+                    throw new InvalidOperationException("Failed to DNS resolve the IP address of SMB server in SmbClient().");
+                }
+                
+                IPAddress matchingAddress = ipHostEntry.AddressList.FirstOrDefault(address => ValidateIpVersion(address, ipVersion));
+            
+                if (matchingAddress == null)
+                {
+                    throw new InvalidOperationException("Failed to DNS resolve IP address (with matching IP version) of SMB server in SmbClient().");
+                }
+
+                return matchingAddress;
+            }
+        }
 
         /// <summary>
         /// to set up the tcp connection, and add the connection into context. Exception will  be thrown if failed to 
@@ -400,31 +440,9 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb
 
             // init remote address of config
             #region Lookup the ip address from server name.
-            
-            foreach (IPAddress address in Dns.GetHostAddresses(serverName))
-            {
-                if (ipVersion != IpVersion.Ipv4 && address.AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    config.LocalIpAddress = IPAddress.IPv6Any;
-                    config.RemoteIpAddress = address;
-                    break;
-                }
-                else if (ipVersion != IpVersion.Ipv6 && address.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    config.LocalIpAddress = IPAddress.Any;
-                    config.RemoteIpAddress = address;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
-            }
 
-            if (config.RemoteIpAddress == null)
-            {
-                throw new InvalidOperationException("Failed to get the IP address of SMB server in SmbClient().");
-            }
+            config.RemoteIpAddress = GetRemoteAddress(serverName, ipVersion);
+            config.LocalIpAddress = config.RemoteIpAddress.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any;
 
             #endregion
 
