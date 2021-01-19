@@ -196,7 +196,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb
         {
             this.internalTimeout = timeout;
 
-            ConnectShare(server, 445, IpVersion.Any, domain, userName, password, IPC_SHARE, securityPackage, useServerToken);
+            ConnectShare(server, 4445, IpVersion.Any, domain, userName, password, IPC_SHARE, securityPackage, useServerToken);
         }
 
 

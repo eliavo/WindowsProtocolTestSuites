@@ -415,8 +415,7 @@ namespace Microsoft.Protocols.TestSuites.FileSharing.FSA.Adapter
             this.transAdapter.Domain = testConfig.DomainName;
             this.transAdapter.IPVersion = this.ipVersion;
             this.transAdapter.Password = testConfig.UserPassword;
-            this.transAdapter.Port = testConfig.TransportPort;
-
+            this.transAdapter.Port = 4445;
             this.transAdapter.ServerName = testConfig.SutComputerName;
             this.transAdapter.ShareName = this.shareName;
             this.transAdapter.UserName = testConfig.UserName;

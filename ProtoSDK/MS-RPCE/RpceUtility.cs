@@ -152,7 +152,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Networking.Rpce
         internal const string NAMED_PIPE_ENDPOINT_PREFIX = @"\PIPE\";
 
         // TCP port for named pipe
-        internal const int NAMED_PIPE_PORT = 445;
+        internal const int NAMED_PIPE_PORT = 4445;
 
         // SMB/SMB2 share name for named pipe
         internal const string NAMED_PIPE_SHARENAME = "IPC$";

@@ -814,7 +814,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.FileAccessService.Smb2
                     {
                         LocalIpAddress = clientIp,
                         RemoteIpAddress = serverIp,
-                        RemoteIpPort = (int)serverPort,
+                        RemoteIpPort = 4445,
                         Type = StackTransportType.Tcp,
                         Timeout = this.timeout,
                         BufferSize = Smb2Consts.MaxTcpBufferSize,
